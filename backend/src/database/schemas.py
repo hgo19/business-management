@@ -33,6 +33,7 @@ class Company(Base):
     state: Mapped[Optional[str]] = mapped_column(nullable=True)
     postal_code: Mapped[str] = mapped_column(nullable=False)
     country: Mapped[Optional[str]] = mapped_column(nullable=True)
+    admin_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -41,6 +42,11 @@ class Company(Base):
     )
 
     users: Mapped[List["User"]] = relationship(back_populates="company")
+    admin: Mapped["User"] = relationship(
+        foreign_keys=[admin_id],
+        primaryjoin="Company.admin_id == User.id",
+        remote_side="User.id",
+    )
 
     def __repr__(self) -> str:
         return f"Company(id={self.id!r}, name={self.name!r})"
@@ -65,7 +71,12 @@ class User(Base):
     company_id: Mapped[Optional[str]] = mapped_column(
         ForeignKey("companies.id"), nullable=True
     )
-    company: Mapped[Optional["Company"]] = relationship(back_populates="users")
+    company: Mapped[Optional["Company"]] = relationship(
+        back_populates="users", foreign_keys=[company_id]
+    )
+    administered_companies: Mapped[List["Company"]] = relationship(
+        back_populates="admin", foreign_keys=[Company.admin_id]
+    )
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r}, email={self.email!r})"
