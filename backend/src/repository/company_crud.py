@@ -37,7 +37,9 @@ class CompanyCrudRepository:
         companies = result.scalars().all()
         return [CompanyRead.from_orm(company) for company in companies]
 
-    async def update(self, company_id: str, company_update: CompanyUpdate) -> CompanyRead:
+    async def update(
+        self, company_id: str, company_update: CompanyUpdate
+    ) -> CompanyRead:
         result = await self.db.execute(select(Company).filter(Company.id == company_id))
         company = result.scalars().first()
         if not company:
@@ -56,7 +58,7 @@ class CompanyCrudRepository:
         company = result.scalars().first()
         if not company:
             raise NoResultFound(f"Company with id {company_id} not found")
-            
+
         await self.db.delete(company)
         await self.db.commit()
 

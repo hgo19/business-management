@@ -48,7 +48,7 @@ class UserCrudRepository:
         await self.db.commit()
         await self.db.refresh(user)
         return UserRead.from_orm(user)
-    
+
     async def delete(self, user_id: str) -> bool:
         result = await self.db.execute(select(User).filter(User.id == user_id))
         user = result.scalars().first()
@@ -59,7 +59,8 @@ class UserCrudRepository:
         await self.db.commit()
 
     async def get_by_company_id(self, company_id: str) -> list[UserRead]:
-        result = await self.db.execute(select(User).filter(User.company_id == company_id))
+        result = await self.db.execute(
+            select(User).filter(User.company_id == company_id)
+        )
         users = result.scalars().all()
         return [UserRead.from_orm(user) for user in users]
-
