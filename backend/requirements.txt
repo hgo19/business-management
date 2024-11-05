@@ -7,3 +7,6 @@ python-dotenv
 sqlalchemy[asyncio]
 asyncpg
 alembic
+fastapi
+python-jose[cryptography]
+passlib
