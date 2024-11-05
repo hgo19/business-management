@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.database.connection import init_db, dispose_engine
-from src.routes.auth import auth_router
+from src.routes import (
+    auth,
+    users
+)
 
 app = FastAPI()
 
@@ -13,7 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
+app.include_router(auth.auth_router)
+app.include_router(users.user_router)
 
 
 @app.on_event("startup")
