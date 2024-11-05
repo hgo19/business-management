@@ -1,7 +1,6 @@
 from src.models.user import UserCreate, UserRead, UserUpdate
 from src.repository.user_crud import UserCrudRepository
 from src.utils.encrypter import hash_password
-from sqlalchemy.ext.asyncio import AsyncSession
 from .company_service import CompanyService
 
 
