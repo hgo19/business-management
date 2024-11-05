@@ -10,3 +10,4 @@ alembic
 fastapi
 python-jose[cryptography]
 passlib
+uvicorn
