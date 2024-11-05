@@ -5,3 +5,5 @@ SQLAlchemy
 sqlalchemy-utils
 python-dotenv
 sqlalchemy[asyncio]
+asyncpg
+alembic
