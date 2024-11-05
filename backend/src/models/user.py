@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict
 from pydantic import BaseModel, Field, EmailStr, validator
 from enum import Enum
 import re
@@ -70,14 +70,8 @@ class UserLogin(BaseModel):
 
 
 class UserResponse(UserRead):
-    administered_companies: Optional[List["CompanyResponse"]] = []
+    administered_companies: Optional[List[Dict]] = []
 
     class Config:
         from_attributes = True
         fields = {"refresh_token": {"exclude": True}, "password": {"exclude": True}}
-
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .company import CompanyResponse
