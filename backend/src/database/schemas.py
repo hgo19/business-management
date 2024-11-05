@@ -24,6 +24,15 @@ class Company(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     name: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(nullable=True)
+    website: Mapped[Optional[str]] = mapped_column(nullable=True)
+    contact_email: Mapped[str] = mapped_column(nullable=False)
+    contact_phone: Mapped[str] = mapped_column(nullable=False)
+    street: Mapped[Optional[str]] = mapped_column(nullable=True)
+    city: Mapped[Optional[str]] = mapped_column(nullable=True)
+    state: Mapped[Optional[str]] = mapped_column(nullable=True)
+    postal_code: Mapped[str] = mapped_column(nullable=False)
+    country: Mapped[Optional[str]] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
