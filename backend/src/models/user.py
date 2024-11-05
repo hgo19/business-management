@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field, EmailStr, validator
 from enum import Enum
 import re
@@ -48,6 +48,36 @@ class UserRead(UserCreate):
         from_attributes = True
 
 
+class UserUpdate(UserBase):
+    password: Optional[str] = Field(
+        None,
+        min_length=6,
+        description="Password with at least 1 uppercase letter, 1 number, and min 6 characters",
+    )
+
+    @validator("password", always=True)
+    def validate_password(cls, v):
+        if v is not None and not re.search(r"^(?=.*[A-Z])(?=.*\d).{6,}$", v):
+            raise ValueError(
+                "Password must contain at least 1 uppercase letter, 1 number, and be at least 6 characters long"
+            )
+        return v
+
+
 class UserLogin(BaseModel):
     email: str
     password: str
+
+
+class UserResponse(UserRead):
+    administered_companies: Optional[List["CompanyResponse"]] = []
+
+    class Config:
+        from_attributes = True
+        fields = {"refresh_token": {"exclude": True}, "password": {"exclude": True}}
+
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .company import CompanyResponse
