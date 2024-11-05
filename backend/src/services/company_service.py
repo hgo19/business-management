@@ -2,7 +2,6 @@ from src.models.company import CompanyCreate, CompanyRead, CompanyUpdate
 from src.models.user import UserRead
 from src.repository.company_crud import CompanyCrudRepository
 from sqlalchemy.exc import NoResultFound
-from src.services.user_service import UserService
 
 
 class CompanyService:
@@ -12,10 +11,8 @@ class CompanyService:
     async def create_company(
         self,
         company_create: CompanyCreate,
-        admin_user_id: str,
-        user_service: UserService,
+        admin_user: UserRead,
     ) -> CompanyRead:
-        admin_user = await user_service.get_user_by_id(admin_user_id)
         if not admin_user:
             raise ValueError("An admin user is required to create a company.")
         existing_company = await self.repository.get_by_email(
