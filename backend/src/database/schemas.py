@@ -1,10 +1,7 @@
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
+from sqlalchemy import Enum, ForeignKey, DateTime, func
 import enum
 from datetime import datetime
-from sqlalchemy import Enum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, DateTime
-from sqlalchemy.sql import func
 import uuid
 from typing import List, Optional
 
@@ -41,11 +38,12 @@ class Company(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    users: Mapped[List["User"]] = relationship(back_populates="company")
+    users: Mapped[List["User"]] = relationship(
+        back_populates="company",
+        foreign_keys="User.company_id"
+    )
     admin: Mapped["User"] = relationship(
-        foreign_keys=[admin_id],
-        primaryjoin="Company.admin_id == User.id",
-        remote_side="User.id",
+        foreign_keys="Company.admin_id", back_populates="administered_companies"
     )
 
     def __repr__(self) -> str:
@@ -72,10 +70,12 @@ class User(Base):
         ForeignKey("companies.id"), nullable=True
     )
     company: Mapped[Optional["Company"]] = relationship(
-        back_populates="users", foreign_keys=[company_id]
+        back_populates="users",
+        foreign_keys="User.company_id"
     )
     administered_companies: Mapped[List["Company"]] = relationship(
-        back_populates="admin", foreign_keys=[Company.admin_id]
+        back_populates="admin",
+        foreign_keys="Company.admin_id"
     )
 
     def __repr__(self) -> str:
