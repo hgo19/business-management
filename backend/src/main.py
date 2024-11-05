@@ -15,13 +15,16 @@ app.add_middleware(
 
 app.include_router(auth_router)
 
+
 @app.on_event("startup")
 async def startup():
     await init_db()
 
+
 @app.on_event("shutdown")
 async def shutdown():
     await dispose_engine()
+
 
 if __name__ == "__main__":
     import uvicorn

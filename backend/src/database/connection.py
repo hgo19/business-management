@@ -6,6 +6,9 @@ from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.future import select
 from dotenv import load_dotenv
 from typing import AsyncGenerator
+from .schemas import User
+from src.utils.encrypter import hash_password
+from .schemas import Roles
 
 load_dotenv()
 
@@ -22,15 +25,36 @@ engine = create_async_engine(url, echo=True)
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
+async def create_super_admin(session: AsyncSession):
+    result = await session.execute(select(User).where(User.role == Roles.superadmin))
+    super_admin = result.scalar_one_or_none()
+
+    if super_admin is None:
+        hashed_password = hash_password(os.getenv("SUPER_ADMIN_PASSWORD"))
+        new_super_admin = User(
+            name=os.getenv("SUPER_ADMIN_NAME"),
+            email=os.getenv("SUPER_ADMIN_EMAIL"),
+            password=hashed_password,
+            role=Roles.superadmin,
+        )
+        session.add(new_super_admin)
+        await session.commit()
+        print("Super admin user created.")
+    else:
+        print("Super admin user already exists.")
+
+
 async def init_db():
     async with AsyncSessionLocal() as session:
         try:
             await session.execute(text("SELECT 1"))
             logger.debug("Database exists, continuing initialization.")
+            await create_super_admin(session)
         except Exception as e:
             logger.debug("Database does not exist. Creating database...")
             if not database_exists(engine.url):
                 await create_database(engine.url)
+                await create_super_admin(session)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
