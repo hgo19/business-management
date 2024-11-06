@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 interface User {
   email: string;
   name: string;
+  role: string;
 }
 
 interface AuthContextType {
@@ -30,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = Cookies.get('access_token');
         if (token) {
           const response = await api.get('/auth/me');
-          setUser(response.data.user);
+          setUser(response.data);
         }
       } catch (error) {
         console.error('Failed to load user:', error);
@@ -50,7 +51,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       Cookies.set('access_token', access_token);
       Cookies.set('refresh_token', refresh_token);
       setUser(user);
-      router.push('/dashboard');
+      switch (user.role) {
+        case 'super_admin':
+          router.push('/super-admin');
+          break;
+        case 'admin':
+          router.push('/users-dashboard');
+          break;
+        case 'operator':
+          router.push('/company-details');
+          break;
+        default:
+          router.push('/chat');
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
