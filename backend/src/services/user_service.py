@@ -20,6 +20,9 @@ class UserService:
 
     async def get_all_users(self) -> list[UserRead]:
         return await self.repository.get_all()
+    
+    async def get_all_admins(self) -> list[UserRead]:
+        return await self.repository.get_all_admins()
 
     async def update_user(self, user_id: str, user_update: UserUpdate) -> UserRead:
         if user_update.password:

@@ -193,3 +193,18 @@ async def get_all_users(
     user_service = UserService(repository=repository)
     users = await user_service.get_all_users()
     return users
+
+
+@user_router.get(
+    "/admins",
+    response_model=List[UserResponse],
+    dependencies=[superadmin_checker],
+)
+async def get_all_admins(
+    session: AsyncSession = Depends(get_db),
+):
+    repository = UserCrudRepository(session)
+    user_service = UserService(repository=repository)
+    users = await user_service.get_all_admins()
+    return users
+

@@ -64,3 +64,9 @@ class UserCrudRepository:
         )
         users = result.scalars().all()
         return [UserRead.from_orm(user) for user in users]
+    
+
+    async def get_all_admins(self) -> list[UserRead]:
+        result = await self.db.execute(select(User).filter(User.role == "admin"))
+        users = result.scalars().all()
+        return [UserRead.from_orm(user) for user in users]
