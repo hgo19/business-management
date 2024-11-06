@@ -8,7 +8,7 @@ from src.services.company_service import CompanyService
 from src.repository.company_crud import CompanyCrudRepository
 from src.services.user_service import UserService
 from src.repository.user_crud import UserCrudRepository
-from src.models.user import UserRead
+from src.models.user import UserRead, UserResponse
 
 company_router = APIRouter(prefix="/companies", tags=["Companies"])
 access_token_bearer = AccessTokenBearer()
@@ -87,18 +87,17 @@ async def get_all_companies(
     return companies
 
 
-@company_router.patch(
+@company_router.put(
     "/{company_id}",
     response_model=CompanyRead,
     dependencies=[admin_checker],
 )
 async def update_company(
-    company_id: int,
+    company_id: str,
     company_update: CompanyUpdate,
     session: AsyncSession = Depends(get_db),
-    token_details: dict = Depends(access_token_bearer),
+    current_user: UserResponse = Depends(get_current_user)
 ):
-    current_user = token_details.get("user")
     repository = CompanyCrudRepository(session)
     company_service = CompanyService(repository=repository)
 
@@ -106,7 +105,7 @@ async def update_company(
     if not existing_company:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company not found")
 
-    if current_user["role"] == "admin" and current_user["company_id"] != company_id:
+    if current_user.role not in ["admin", "superadmin"] and current_user.company_id != company_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin can only update their own company",
@@ -126,7 +125,7 @@ async def update_company(
     dependencies=[superadmin_checker],
 )
 async def delete_company(
-    company_id: int,
+    company_id: str,
     session: AsyncSession = Depends(get_db),
     token_details: dict = Depends(access_token_bearer),
 ):
