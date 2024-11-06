@@ -27,8 +27,13 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
+        Cookies.remove('access_token');
         const refreshToken = Cookies.get('refresh_token');
-        const { data } = await api.post<RefreshTokenResponse>('/auth/refresh_token', { refresh_token: refreshToken });
+        const { data } = await api.post<RefreshTokenResponse>('/auth/refresh_token', null, {
+          headers: {
+            'Authorization': `Bearer ${refreshToken}`,
+          },
+        });
         const { access_token } = data;
         Cookies.set('access_token', access_token);
         originalRequest.headers.set('Authorization', `Bearer ${access_token}`);

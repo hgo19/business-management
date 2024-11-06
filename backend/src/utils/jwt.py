@@ -9,10 +9,9 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 10))
 
 
-dACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 
@@ -42,7 +41,6 @@ def decode_token(token: str, credentials_exception):
         email: int = payload.get("email")
         if email is None:
             raise credentials_exception
-        payload.pop("exp", None)
         payload.update({"token": token})
         token_response = TokenResponse(**payload)
         return token_response

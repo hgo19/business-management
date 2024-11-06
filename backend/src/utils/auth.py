@@ -10,6 +10,7 @@ from src.database.schemas import User
 from .jwt import decode_token
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..repository.user_crud import UserCrudRepository
+from src.models.user import UserResponse
 
 
 
@@ -56,7 +57,6 @@ async def get_current_user(
     session: AsyncSession = Depends(get_db),
 ):
     user_email = token_details.email
-    print(f"user_email: {user_email}")
     user_repository = UserCrudRepository(session)
     user = await user_repository.get_by_email(user_email)
 
@@ -66,7 +66,7 @@ async def get_current_user(
             detail="User not found",
         )
 
-    return user
+    return UserResponse(**user.dict())
 
 
 class RoleChecker:
