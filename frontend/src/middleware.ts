@@ -22,7 +22,7 @@ export default async function middleware(request: NextRequest) {
     }
 
     if (
-      (pathname === '/users-dashboard' || pathname === '/company') &&
+      (pathname === '/admin-dashboard' || pathname === '/company') &&
       userRole !== 'admin'
     ) {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
@@ -39,7 +39,7 @@ export default async function middleware(request: NextRequest) {
           pathToRedirect = '/super-admin';
           break;
         case 'admin':
-          pathToRedirect = '/users-dashboard';
+          pathToRedirect = '/admin-dashboard';
           break;
         case 'operator':
           pathToRedirect = '/company-details';
