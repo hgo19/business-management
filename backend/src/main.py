@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import DBAPIError, IntegrityError
-import asyncpg
+from fastapi.exceptions import RequestValidationError
 import logging
 from src.database.connection import init_db, dispose_engine
 from src.routes import auth, users, companies
@@ -36,6 +36,15 @@ async def shutdown():
     await dispose_engine()
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    logger.error(f"Validation error: {exc}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body": exc.body},
+    )
+
+
 @app.exception_handler(IntegrityError)
 async def integrity_error_handler(request: Request, exc: IntegrityError):
     return JSONResponse(
@@ -51,14 +60,6 @@ async def dbapi_error_handler(request: Request, exc: DBAPIError):
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": error_message},
-    )
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": "Invalid request parameters."},
     )
 
 

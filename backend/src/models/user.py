@@ -1,10 +1,10 @@
 from typing import Optional, List
 from pydantic import Field, validator, BaseModel, EmailStr
-from .shared import UserRead, CompanyRead, Roles
+from .shared import UserRead, CompanyRead, Roles, UserBase
 import re
 
 
-class UserCreate(UserRead):
+class UserCreate(UserBase):
     password: str = Field(
         ...,
         min_length=6,

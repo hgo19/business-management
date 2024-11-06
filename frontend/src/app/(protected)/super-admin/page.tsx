@@ -18,9 +18,10 @@ export default function Component() {
   const [companiesData, setCompaniesData] = useState<ICompanyRead[]>([])
   const [editingUser, setEditingUser] = useState<IUserRead | null>(null);
   const [editingCompany, setEditingCompany] = useState<ICompanyRead | null>(null);
+  const [admins, setAdmins] = useState<IUserRead[]>([])
   const { user } = useAuth()
 
-  console.log(companiesData)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,6 +38,16 @@ export default function Component() {
   
     fetchData()
   }, [])
+
+
+  useEffect(() => {
+    const getAdmins = () => {
+      const admins = usersData.filter(userData => userData.role === "admin")
+      setAdmins(admins)
+    }
+
+    getAdmins()
+  }, [usersData])
 
   const handleDeleteCompany = async (companyId: string) => {
     try {
@@ -168,6 +179,7 @@ export default function Component() {
         onClose={() => {setIsCompanyModalOpen(false); setEditingCompany(null);}} 
         setCompaniesData={setCompaniesData} 
         editingCompany={editingCompany}
+        admins={admins}
       />
       <UserModal 
         isOpen={isUserModalOpen} 

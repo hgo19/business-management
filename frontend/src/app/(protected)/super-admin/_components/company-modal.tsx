@@ -18,28 +18,14 @@ interface CompanyModalProps {
   onClose: () => void
   setCompaniesData: Dispatch<SetStateAction<ICompanyRead[]>>
   editingCompany: ICompanyRead | null
+  admins: IUserRead[]
 }
 
-export default function CompanyModal({ isOpen, onClose, setCompaniesData, editingCompany }: CompanyModalProps) {
+export default function CompanyModal({ isOpen, onClose, setCompaniesData, editingCompany, admins }: CompanyModalProps) {
   const { register, handleSubmit, formState: { errors }, reset, control, setValue } = useForm<ICompanyCreate & ICompanyUpdate>()
-  const [admins, setAdmins] = useState<IUserRead[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchAdmins = async () => {
-      try {
-        const response = await api.get<IUserRead[]>('/users/admins')
-        setAdmins(response.data)
-        setIsLoading(false)
-      } catch (err) {
-        setError('Failed to load admins. Please try again later.')
-        setIsLoading(false)
-      }
-    }
-
-    fetchAdmins()
-  }, [])
 
   useEffect(() => {
     if (editingCompany) {
