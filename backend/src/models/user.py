@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 from pydantic import Field, validator, BaseModel, EmailStr
 from .shared import UserRead, CompanyRead, Roles, UserBase
 import re
@@ -21,7 +21,7 @@ class UserCreate(UserBase):
 
 
 class UserResponse(UserRead):
-    administered_companies: Optional[List[CompanyRead]] = []
+    administered_company: Optional[CompanyRead] = None  # Updated field
 
     class Config:
         from_attributes = True
@@ -29,7 +29,7 @@ class UserResponse(UserRead):
 
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
@@ -59,8 +59,3 @@ class UserUpdate(BaseModel):
                 "Password must contain at least 1 uppercase letter, 1 number, and be at least 6 characters long"
             )
         return v
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str

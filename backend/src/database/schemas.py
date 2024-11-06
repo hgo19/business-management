@@ -39,8 +39,11 @@ class User(Base):
     company: Mapped[Optional["Company"]] = relationship(
         back_populates="users", foreign_keys=[company_id], lazy="joined"
     )
-    administered_companies: Mapped[List["Company"]] = relationship(
-        back_populates="admin", foreign_keys=lambda: [Company.admin_id], lazy="joined"
+    administered_company: Mapped[Optional["Company"]] = relationship(
+        back_populates="admin",
+        foreign_keys=lambda: [Company.admin_id],
+        lazy="joined",
+        uselist=False,
     )
 
     def __repr__(self) -> str:
@@ -73,7 +76,7 @@ class Company(Base):
         back_populates="company", foreign_keys=[User.company_id], lazy="joined"
     )
     admin: Mapped[User] = relationship(
-        foreign_keys=[admin_id], back_populates="administered_companies", lazy="joined"
+        foreign_keys=[admin_id], back_populates="administered_company", lazy="joined"
     )
 
     def __repr__(self) -> str:

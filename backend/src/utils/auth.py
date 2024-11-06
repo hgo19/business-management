@@ -60,6 +60,8 @@ async def get_current_user(
     user_repository = UserCrudRepository(session)
     user = await user_repository.get_by_email(user_email)
 
+    print(f"USER PRINT: {user}")
+
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

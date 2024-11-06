@@ -43,7 +43,6 @@ class UserService:
     async def create_company_operator(
         self, user_data: UserCreate, company_service: CompanyService
     ) -> UserRead:
-        company_id = user_data.company_id
-        if await self.validate_company_operator(user_data, company_service, company_id):
+        if await self.validate_company_operator(user_data, company_service):
             return await self.create_user(user_data)
         raise ValueError("Invalid company or operator creation parameters")

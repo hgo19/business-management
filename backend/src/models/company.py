@@ -1,10 +1,10 @@
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr, validator
-from .shared import UserRead, CompanyRead
+from .shared import CompanyRead, UserRead, CompanyBase
 import re
 
 
-class CompanyCreate(CompanyRead):
+class CompanyCreate(CompanyBase):
     pass
 
 

@@ -52,6 +52,7 @@ async def create_company_operator(
     user_data: UserCreate,
     session: AsyncSession = Depends(get_db),
     token_details: dict = Depends(access_token_bearer),
+    current_user: UserResponse = Depends(get_current_user),
 ):
     if user_data.role != "operator":
         raise HTTPException(
@@ -59,10 +60,8 @@ async def create_company_operator(
             detail="Role must be operator for this endpoint",
         )
 
-    current_user = token_details.get("user")
-
-    if current_user["role"] == "admin":
-        if user_data.company_id != current_user["company_id"]:
+    if current_user.role == "admin":
+        if user_data.company_id != current_user.administered_company.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Admin can only create operators for their own company",
@@ -89,13 +88,12 @@ async def create_company_operator(
     dependencies=[admin_checker],
 )
 async def get_company_users(
-    company_id: int,
+    company_id: str,
     session: AsyncSession = Depends(get_db),
     token_details: dict = Depends(access_token_bearer),
+    current_user: UserResponse = Depends(get_current_user)
 ):
-    current_user = token_details.get("user")
-
-    if current_user["role"] == "admin" and current_user["company_id"] != company_id:
+    if current_user.role == "admin" and current_user.administered_company.id != company_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin can only view users from their own company",
@@ -235,3 +233,33 @@ async def update_user(
 
     updated_user = await user_service.update_user(user_id, user_update)
     return updated_user
+
+
+@user_router.get(
+    "/{user_id}",
+    response_model=UserResponse,
+    dependencies=[admin_checker],
+    status_code=status.HTTP_200_OK,
+)
+async def get_user_by_id(
+    user_id: str,
+    session: AsyncSession = Depends(get_db),
+    token_details: dict = Depends(access_token_bearer),
+    current_user: UserResponse = Depends(get_current_user),
+):
+    repository = UserCrudRepository(session)
+    user_service = UserService(repository=repository)
+
+    user = await user_service.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if current_user.role == "admin" and user.company_id != current_user.company_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin can only access users from their own company",
+        )
+
+    return user

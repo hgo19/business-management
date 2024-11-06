@@ -54,11 +54,11 @@ async def create_company(
     dependencies=[admin_checker],
 )
 async def get_company_by_id(
-    company_id: int,
+    company_id: str,
     session: AsyncSession = Depends(get_db),
     token_details: dict = Depends(access_token_bearer),
+    current_user: UserResponse = Depends(get_current_user),
 ):
-    current_user = token_details.get("user")
     repository = CompanyCrudRepository(session)
     company_service = CompanyService(repository=repository)
 
@@ -68,7 +68,7 @@ async def get_company_by_id(
             status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
         )
 
-    if current_user["role"] == "admin" and current_user["company_id"] != company_id:
+    if current_user.role == "admin" and current_user.company_id != company_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin can only view their own company",

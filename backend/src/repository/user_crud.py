@@ -4,7 +4,6 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from ..models.user import UserCreate, UserResponse, UserUpdate, UserRead
 from ..database.schemas import User, Roles
-from sqlalchemy.dialects.postgresql import dialect
 
 
 class UserCrudRepository:
@@ -21,7 +20,7 @@ class UserCrudRepository:
     async def get_by_id(self, user_id: str) -> UserResponse:
         result = await self.db.execute(
             select(User)
-            .options(joinedload(User.company), joinedload(User.administered_companies))
+            .options(joinedload(User.company), joinedload(User.administered_company))
             .filter(User.id == user_id)
         )
         user = result.unique().scalars().first()
@@ -32,18 +31,18 @@ class UserCrudRepository:
     async def get_by_email(self, email: str) -> UserRead | None:
         result = await self.db.execute(
             select(User)
-            .options(joinedload(User.company), joinedload(User.administered_companies))
+            .options(joinedload(User.company), joinedload(User.administered_company))
             .filter(User.email == email)
         )
         user = result.unique().scalars().first()
         if not user:
             return None
-        return UserRead.from_orm(user)
+        return UserResponse.from_orm(user)
 
     async def get_all(self) -> list[UserResponse]:
         result = await self.db.execute(
             select(User).options(
-                joinedload(User.company), joinedload(User.administered_companies)
+                joinedload(User.company), joinedload(User.administered_company)
             )
         )
 
@@ -74,7 +73,7 @@ class UserCrudRepository:
     async def get_by_company_id(self, company_id: str) -> list[UserResponse]:
         result = await self.db.execute(
             select(User)
-            .options(joinedload(User.company), joinedload(User.administered_companies))
+            .options(joinedload(User.company), joinedload(User.administered_company))
             .filter(User.company_id == company_id)
         )
         users = result.unique().scalars().all()
@@ -83,7 +82,7 @@ class UserCrudRepository:
     async def get_all_admins(self) -> list[UserResponse]:
         result = await self.db.execute(
             select(User)
-            .options(joinedload(User.company), joinedload(User.administered_companies))
+            .options(joinedload(User.company), joinedload(User.administered_company))
             .filter(User.role == Roles.admin)
         )
         users = result.unique().scalars().all()
