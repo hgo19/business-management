@@ -13,4 +13,8 @@ class TokenData(BaseModel):
     id: str
     name: str
     email: str
+    role: str
     exp: Optional[datetime] = None
+
+class TokenResponse(TokenData):
+    token: Optional[str]

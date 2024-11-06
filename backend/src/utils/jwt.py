@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from dotenv import load_dotenv
-from src.models.token import TokenData
+from src.models.token import TokenData, TokenResponse
 
 load_dotenv()
 
@@ -43,7 +43,8 @@ def decode_token(token: str, credentials_exception):
         if email is None:
             raise credentials_exception
         payload.pop("exp", None)
-        token_data = TokenData(**payload)
-        return token_data
+        payload.update({"token": token})
+        token_response = TokenResponse(**payload)
+        return token_response
     except JWTError:
         raise credentials_exception
