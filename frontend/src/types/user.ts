@@ -3,6 +3,7 @@ export interface IUserRead {
   name: string
   email: string
   role: string
+  company_id?: string
 }
 
 export interface IUserCreate {
@@ -11,3 +12,6 @@ export interface IUserCreate {
   role: string;
   password: string;
 }
+
+
+export type IUserUpdate = Partial<IUserCreate>

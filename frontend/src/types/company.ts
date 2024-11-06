@@ -18,3 +18,5 @@ export interface ICompanyRead extends ICompanyCreate {
   created_at: string
   updated_at: string
 }
+
+export type ICompanyUpdate = Partial<ICompanyCreate>
