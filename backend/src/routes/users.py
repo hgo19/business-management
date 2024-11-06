@@ -2,13 +2,14 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.exceptions import HTTPException
-from src.utils.auth import AccessTokenBearer, RoleChecker
+from src.utils.auth import AccessTokenBearer, RoleChecker, get_current_user
 from src.database.connection import get_db
 from src.models.user import UserCreate, UserResponse, UserUpdate
 from src.services.user_service import UserService
 from src.repository.user_crud import UserCrudRepository
 from src.services.company_service import CompanyService
 from src.repository.company_crud import CompanyCrudRepository
+from src.models.token import TokenResponse
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
 access_token_bearer = AccessTokenBearer()
@@ -108,53 +109,35 @@ async def get_company_users(
 
 
 @user_router.patch(
-    "/{user_id}", response_model=UserResponse, dependencies=[admin_checker]
+    "/me", response_model=UserResponse
 )
-async def update_user(
-    user_id: int,
+async def update_me(
     user_update: UserUpdate,
     session: AsyncSession = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user),
     token_details: dict = Depends(access_token_bearer),
 ):
-    current_user = token_details.get("user")
-
     repository = UserCrudRepository(session)
     user_service = UserService(repository=repository)
 
-    user_to_update = await user_service.get_user_by_id(user_id)
-    if not user_to_update:
+    if "role" in user_update.dict(exclude_unset=True) and current_user.role != "superadmin":
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not allowed to change your role",
         )
 
-    if current_user["role"] == "admin":
-        if user_to_update.company_id != current_user["company_id"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin can only update users from their own company",
-            )
-        if user_to_update.role != "operator" or user_update.role not in [
-            None,
-            "operator",
-        ]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin can only update operators",
-            )
-
-    updated_user = await user_service.update_user(user_id, user_update)
+    updated_user = await user_service.update_user(current_user.id, user_update)
     return updated_user
 
-
 @user_router.delete(
-    "/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[admin_checker]
+    "/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[superadmin_checker]
 )
 async def delete_user(
-    user_id: int,
+    user_id: str,
     session: AsyncSession = Depends(get_db),
-    token_details: dict = Depends(access_token_bearer),
+    token_details: TokenResponse = Depends(access_token_bearer),
 ):
-    current_user = token_details.get("user")
+    current_user = token_details
 
     repository = UserCrudRepository(session)
     user_service = UserService(repository=repository)
@@ -165,7 +148,7 @@ async def delete_user(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    if current_user["role"] == "admin":
+    if current_user.role == "admin":
         if user_to_delete.company_id != current_user["company_id"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -208,3 +191,40 @@ async def get_all_admins(
     users = await user_service.get_all_admins()
     return users
 
+
+@user_router.put(
+    "/{user_id}",
+    response_model=UserResponse,
+    dependencies=[admin_checker],
+    status_code=status.HTTP_200_OK,
+)
+async def update_user(
+    user_id: str,
+    user_update: UserUpdate,
+    session: AsyncSession = Depends(get_db),
+    token_details: dict = Depends(access_token_bearer),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    repository = UserCrudRepository(session)
+    user_service = UserService(repository=repository)
+
+
+    if current_user.role == "admin":
+        user_to_update = await user_service.get_user_by_id(user_id)
+        if not user_to_update:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+        if user_to_update.company_id != current_user.company_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin can only update users from their own company",
+            )
+        if "role" in user_update.dict(exclude_unset=True) and user_update.role not in ["operator"] and current_user.role is not "superadmin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin can only update operators' role",
+            )
+
+    updated_user = await user_service.update_user(user_id, user_update)
+    return updated_user
