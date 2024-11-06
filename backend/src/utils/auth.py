@@ -14,7 +14,6 @@ from src.models.user import UserResponse
 from src.models.token import TokenResponse
 
 
-
 class TokenBearer(HTTPBearer):
     def __init__(self, auto_error=True):
         super().__init__(auto_error=auto_error)

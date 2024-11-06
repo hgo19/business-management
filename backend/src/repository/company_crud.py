@@ -5,6 +5,7 @@ from src.models.company import CompanyCreate, CompanyResponse, CompanyUpdate
 from src.database.schemas import Company
 from sqlalchemy.orm import joinedload
 
+
 class CompanyCrudRepository:
     def __init__(self, database: AsyncSession) -> None:
         self.db: AsyncSession = database
@@ -19,10 +20,7 @@ class CompanyCrudRepository:
     async def get_by_id(self, company_id: str) -> CompanyResponse:
         result = await self.db.execute(
             select(Company)
-            .options(
-                joinedload(Company.users),
-                joinedload(Company.admin)
-            )
+            .options(joinedload(Company.users), joinedload(Company.admin))
             .filter(Company.id == company_id)
         )
         company = result.unique().scalars().first()
@@ -33,10 +31,7 @@ class CompanyCrudRepository:
     async def get_by_email(self, contact_email: str) -> CompanyResponse | None:
         result = await self.db.execute(
             select(Company)
-            .options(
-                joinedload(Company.users),
-                joinedload(Company.admin)
-            )
+            .options(joinedload(Company.users), joinedload(Company.admin))
             .filter(Company.contact_email == contact_email)
         )
         company = result.unique().scalars().first()
@@ -46,16 +41,16 @@ class CompanyCrudRepository:
 
     async def get_all(self) -> list[CompanyResponse]:
         result = await self.db.execute(
-            select(Company)
-            .options(
-                joinedload(Company.users),
-                joinedload(Company.admin)
+            select(Company).options(
+                joinedload(Company.users), joinedload(Company.admin)
             )
         )
         companies = result.unique().scalars().all()
         return [CompanyResponse.from_orm(company) for company in companies]
 
-    async def update(self, company_id: str, company_update: CompanyUpdate) -> CompanyResponse:
+    async def update(
+        self, company_id: str, company_update: CompanyUpdate
+    ) -> CompanyResponse:
         result = await self.db.execute(select(Company).filter(Company.id == company_id))
         company = result.scalars().first()
         if not company:
@@ -79,10 +74,7 @@ class CompanyCrudRepository:
     async def get_by_name(self, name: str) -> CompanyResponse | None:
         result = await self.db.execute(
             select(Company)
-            .options(
-                joinedload(Company.users),
-                joinedload(Company.admin)
-            )
+            .options(joinedload(Company.users), joinedload(Company.admin))
             .filter(Company.name == name)
         )
         company = result.unique().scalars().first()

@@ -108,9 +108,7 @@ async def get_company_users(
     return users
 
 
-@user_router.patch(
-    "/me", response_model=UserResponse
-)
+@user_router.patch("/me", response_model=UserResponse)
 async def update_me(
     user_update: UserUpdate,
     session: AsyncSession = Depends(get_db),
@@ -120,7 +118,10 @@ async def update_me(
     repository = UserCrudRepository(session)
     user_service = UserService(repository=repository)
 
-    if "role" in user_update.dict(exclude_unset=True) and current_user.role != "superadmin":
+    if (
+        "role" in user_update.dict(exclude_unset=True)
+        and current_user.role != "superadmin"
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not allowed to change your role",
@@ -129,8 +130,11 @@ async def update_me(
     updated_user = await user_service.update_user(current_user.id, user_update)
     return updated_user
 
+
 @user_router.delete(
-    "/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[superadmin_checker]
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[superadmin_checker],
 )
 async def delete_user(
     user_id: str,
@@ -203,11 +207,10 @@ async def update_user(
     user_update: UserUpdate,
     session: AsyncSession = Depends(get_db),
     token_details: dict = Depends(access_token_bearer),
-    current_user: UserResponse = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user),
 ):
     repository = UserCrudRepository(session)
     user_service = UserService(repository=repository)
-
 
     if current_user.role == "admin":
         user_to_update = await user_service.get_user_by_id(user_id)
@@ -220,7 +223,11 @@ async def update_user(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Admin can only update users from their own company",
             )
-        if "role" in user_update.dict(exclude_unset=True) and user_update.role not in ["operator"] and current_user.role is not "superadmin":
+        if (
+            "role" in user_update.dict(exclude_unset=True)
+            and user_update.role not in ["operator"]
+            and current_user.role is not "superadmin"
+        ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Admin can only update operators' role",

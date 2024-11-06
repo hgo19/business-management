@@ -3,8 +3,10 @@ from pydantic import BaseModel, EmailStr, validator
 from .shared import UserRead, CompanyRead
 import re
 
+
 class CompanyCreate(CompanyRead):
     pass
+
 
 class CompanyResponse(CompanyRead):
     users: Optional[List[UserRead]] = []
@@ -12,6 +14,7 @@ class CompanyResponse(CompanyRead):
 
     class Config:
         from_attributes = True
+
 
 class CompanyUpdate(BaseModel):
     name: Optional[str] = None

@@ -36,7 +36,9 @@ async def create_company(
     admin_user = await user_service.get_user_by_id(company_data.admin_id)
 
     if not admin_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin"
+        )
 
     try:
         new_company = await company_service.create_company(company_data, admin_user)
@@ -62,7 +64,9 @@ async def get_company_by_id(
 
     company = await company_service.get_company_by_id(company_id)
     if not company:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
+        )
 
     if current_user["role"] == "admin" and current_user["company_id"] != company_id:
         raise HTTPException(
@@ -96,24 +100,33 @@ async def update_company(
     company_id: str,
     company_update: CompanyUpdate,
     session: AsyncSession = Depends(get_db),
-    current_user: UserResponse = Depends(get_current_user)
+    current_user: UserResponse = Depends(get_current_user),
 ):
     repository = CompanyCrudRepository(session)
     company_service = CompanyService(repository=repository)
 
     existing_company = await company_service.get_company_by_id(company_id)
     if not existing_company:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
+        )
 
-    if current_user.role not in ["admin", "superadmin"] and current_user.company_id != company_id:
+    if (
+        current_user.role not in ["admin", "superadmin"]
+        and current_user.company_id != company_id
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin can only update their own company",
         )
 
-    is_valid_update = await company_service.validate_company_update(company_id, company_update)
+    is_valid_update = await company_service.validate_company_update(
+        company_id, company_update
+    )
     if not is_valid_update:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid company update")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid company update"
+        )
 
     updated_company = await company_service.update_company(company_id, company_update)
     return updated_company
@@ -134,7 +147,9 @@ async def delete_company(
 
     existing_company = await company_service.get_company_by_id(company_id)
     if not existing_company:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
+        )
 
     await company_service.delete_company(company_id)
     return {}
@@ -161,6 +176,8 @@ async def get_my_company(
 
     company = await company_service.get_company_by_id(current_user["company_id"])
     if not company:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
+        )
 
     return company

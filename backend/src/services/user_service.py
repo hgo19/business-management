@@ -20,7 +20,7 @@ class UserService:
 
     async def get_all_users(self) -> list[UserRead]:
         return await self.repository.get_all()
-    
+
     async def get_all_admins(self) -> list[UserRead]:
         return await self.repository.get_all_admins()
 

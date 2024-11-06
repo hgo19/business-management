@@ -16,5 +16,6 @@ class TokenData(BaseModel):
     role: str
     exp: Optional[datetime] = None
 
+
 class TokenResponse(TokenData):
     token: Optional[str]

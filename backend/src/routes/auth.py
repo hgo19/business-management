@@ -30,7 +30,9 @@ async def login_users(login_data: UserLogin, session: AsyncSession = Depends(get
         password_valid = verify_password(password, hashed_password=user.password)
 
         if password_valid:
-            token_data = TokenData(id=user.id, email=user.email, name=user.name, role=user.role)
+            token_data = TokenData(
+                id=user.id, email=user.email, name=user.name, role=user.role
+            )
             access_token = create_access_token(data=token_data)
 
             refresh_token = create_refresh_token(
@@ -55,7 +57,9 @@ async def login_users(login_data: UserLogin, session: AsyncSession = Depends(get
 
 
 @auth_router.post("/refresh_token")
-async def get_new_access_token(token_details: TokenResponse = Depends(RefreshTokenBearer())):
+async def get_new_access_token(
+    token_details: TokenResponse = Depends(RefreshTokenBearer()),
+):
     expiry_timestamp = token_details.exp
     token_dict = token_details.dict()
     token_dict.pop("token", None)
@@ -70,6 +74,7 @@ async def get_new_access_token(token_details: TokenResponse = Depends(RefreshTok
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid or expired token",
     )
+
 
 @auth_router.get("/me")
 async def read_current_user(current_user: UserResponse = Depends(get_current_user)):

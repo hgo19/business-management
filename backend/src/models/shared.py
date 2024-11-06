@@ -3,10 +3,12 @@ from typing import Optional
 from pydantic import BaseModel, Field, EmailStr, validator
 from enum import Enum
 
+
 class Roles(str, Enum):
     admin = "admin"
     superadmin = "superadmin"
     operator = "operator"
+
 
 class UserBase(BaseModel):
     name: str = Field(..., title="Name", description="The name of the user")
@@ -18,6 +20,7 @@ class UserBase(BaseModel):
         description="The ID of the company associated with the user",
     )
 
+
 class UserRead(UserBase):
     id: str
     refresh_token: Optional[str]
@@ -27,6 +30,7 @@ class UserRead(UserBase):
 
     class Config:
         from_attributes = True
+
 
 class CompanyBase(BaseModel):
     name: str = Field(..., title="Name", description="The name of the company")
@@ -52,6 +56,7 @@ class CompanyBase(BaseModel):
     admin_id: str = Field(
         ..., title="Admin ID", description="The ID of the company administrator"
     )
+
 
 class CompanyRead(CompanyBase):
     id: str

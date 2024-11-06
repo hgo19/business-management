@@ -3,6 +3,7 @@ from pydantic import Field, validator, BaseModel, EmailStr
 from .shared import UserRead, CompanyRead, Roles
 import re
 
+
 class UserCreate(UserRead):
     password: str = Field(
         ...,
@@ -18,6 +19,7 @@ class UserCreate(UserRead):
             )
         return v
 
+
 class UserResponse(UserRead):
     administered_companies: Optional[List[CompanyRead]] = []
 
@@ -25,14 +27,20 @@ class UserResponse(UserRead):
         from_attributes = True
         fields = {"refresh_token": {"exclude": True}, "password": {"exclude": True}}
 
+
 class UserLogin(BaseModel):
     email: str
     password: str
 
+
 class UserUpdate(BaseModel):
     name: Optional[str] = Field(None, title="Name", description="The name of the user")
-    email: Optional[EmailStr] = Field(None, title="Email", description="The email of the user")
-    role: Optional[Roles] = Field(None, title="Role", description="The role of the user")
+    email: Optional[EmailStr] = Field(
+        None, title="Email", description="The email of the user"
+    )
+    role: Optional[Roles] = Field(
+        None, title="Role", description="The role of the user"
+    )
     company_id: Optional[str] = Field(
         None,
         title="Company ID",
@@ -51,6 +59,7 @@ class UserUpdate(BaseModel):
                 "Password must contain at least 1 uppercase letter, 1 number, and be at least 6 characters long"
             )
         return v
+
 
 class UserLogin(BaseModel):
     email: EmailStr

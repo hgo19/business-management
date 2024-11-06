@@ -25,24 +25,24 @@ app.include_router(auth.auth_router)
 app.include_router(users.user_router)
 app.include_router(companies.company_router)
 
+
 @app.on_event("startup")
 async def startup():
     await init_db()
+
 
 @app.on_event("shutdown")
 async def shutdown():
     await dispose_engine()
 
 
-
 @app.exception_handler(IntegrityError)
 async def integrity_error_handler(request: Request, exc: IntegrityError):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={
-            "detail": "Integrity error occurred. Please check your input data."
-        },
+        content={"detail": "Integrity error occurred. Please check your input data."},
     )
+
 
 @app.exception_handler(DBAPIError)
 async def dbapi_error_handler(request: Request, exc: DBAPIError):
@@ -50,9 +50,7 @@ async def dbapi_error_handler(request: Request, exc: DBAPIError):
     print(f"error message: {error_message}")
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "detail": error_message
-        },
+        content={"detail": error_message},
     )
 
 
@@ -72,6 +70,8 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "An internal server error occurred."},
     )
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

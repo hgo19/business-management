@@ -6,13 +6,16 @@ from datetime import datetime
 import uuid
 from typing import List, Optional
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class Roles(enum.Enum):
     admin = "admin"
     superadmin = "superadmin"
     operator = "operator"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -34,18 +37,15 @@ class User(Base):
         ForeignKey("companies.id"), nullable=True
     )
     company: Mapped[Optional["Company"]] = relationship(
-        back_populates="users",
-        foreign_keys=[company_id],
-        lazy="joined"
+        back_populates="users", foreign_keys=[company_id], lazy="joined"
     )
     administered_companies: Mapped[List["Company"]] = relationship(
-        back_populates="admin",
-        foreign_keys=lambda: [Company.admin_id],
-        lazy="joined"
+        back_populates="admin", foreign_keys=lambda: [Company.admin_id], lazy="joined"
     )
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r}, email={self.email!r})"
+
 
 class Company(Base):
     __tablename__ = "companies"
@@ -70,13 +70,10 @@ class Company(Base):
     )
 
     users: Mapped[List[User]] = relationship(
-        back_populates="company",
-        foreign_keys=[User.company_id],
-        lazy="joined"
+        back_populates="company", foreign_keys=[User.company_id], lazy="joined"
     )
     admin: Mapped[User] = relationship(
         foreign_keys=[admin_id], back_populates="administered_companies", lazy="joined"
-
     )
 
     def __repr__(self) -> str:
