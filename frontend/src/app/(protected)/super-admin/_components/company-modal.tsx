@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm, Controller, set } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -11,19 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react"
 import api from '@/lib/axios'
 import { IUserRead } from '@/types/user'
-import { ICompanyCreate, ICompanyRead } from '@/types/company'
+import { ICompanyCreate, ICompanyRead, ICompanyUpdate } from '@/types/company'
 
-
-
-interface CreateCompanyModalProps {
+interface CompanyModalProps {
   isOpen: boolean
   onClose: () => void
   setCompaniesData: Dispatch<SetStateAction<ICompanyRead[]>>
+  editingCompany: ICompanyRead | null
 }
 
-
-export default function CreateCompanyModal({ isOpen, onClose, setCompaniesData }: CreateCompanyModalProps) {
-  const { register, handleSubmit, formState: { errors }, reset, control } = useForm<ICompanyCreate>() 
+export default function CompanyModal({ isOpen, onClose, setCompaniesData, editingCompany }: CompanyModalProps) {
+  const { register, handleSubmit, formState: { errors }, reset, control, setValue } = useForm<ICompanyCreate & ICompanyUpdate>()
   const [admins, setAdmins] = useState<IUserRead[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -43,21 +41,38 @@ export default function CreateCompanyModal({ isOpen, onClose, setCompaniesData }
     fetchAdmins()
   }, [])
 
-  const onSubmit = async (data: ICompanyCreate) => {
-    console.log(data)
-    const company = await api.post("/companies", data)
-    setCompaniesData((prev) => {
-      return [...prev, company.data]
-    })
-    reset()
-    onClose()
+  useEffect(() => {
+    if (editingCompany) {
+      Object.entries(editingCompany).forEach(([key, value]) => {
+        setValue(key as keyof (ICompanyCreate & ICompanyUpdate), value)
+      })
+    } else {
+      reset()
+    }
+  }, [editingCompany, setValue, reset])
+
+  const onSubmit = async (data: ICompanyCreate & ICompanyUpdate) => {
+    try {
+      let company: ICompanyRead
+      if (editingCompany) {
+        company = (await api.put<ICompanyRead>(`/companies/${editingCompany.id}`, data)).data
+        setCompaniesData(prev => prev.map(c => c.id === company.id ? company : c))
+      } else {
+        company = (await api.post<ICompanyRead>("/companies", data)).data
+        setCompaniesData(prev => [...prev, company])
+      }
+      reset()
+      onClose()
+    } catch (error) {
+      console.error('Error saving company:', error)
+    }
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Company</DialogTitle>
+          <DialogTitle>{editingCompany ? 'Edit Company' : 'Create New Company'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 py-4">
@@ -182,7 +197,9 @@ export default function CreateCompanyModal({ isOpen, onClose, setCompaniesData }
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isLoading}>Create Company</Button>
+            <Button type="submit" disabled={isLoading}>
+              {editingCompany ? 'Update Company' : 'Create Company'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
