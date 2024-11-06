@@ -184,3 +184,17 @@ async def delete_user(
 
     await user_service.delete_user(user_id)
     return {}
+
+
+@user_router.get(
+    "/",
+    response_model=List[UserResponse],
+    dependencies=[Depends(RoleChecker(["super_admin"]))],
+)
+async def get_all_users(
+    session: AsyncSession = Depends(get_db),
+):
+    repository = UserCrudRepository(session)
+    user_service = UserService(repository=repository)
+    users = await user_service.get_all_users()
+    return users
