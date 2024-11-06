@@ -4,11 +4,14 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import { IUserCreate } from '@/types/user';
 
 interface User {
+  id: string;
   email: string;
   name: string;
   role: string;
+  company_id: string;
 }
 
 interface AuthContextType {
@@ -16,6 +19,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  updateUser: (userData: Partial<IUserCreate>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           router.push('/super-admin');
           break;
         case 'admin':
-          router.push('/users-dashboard');
+          router.push('/admin-dashboard');
           break;
         case 'operator':
           router.push('/company-details');
@@ -77,8 +81,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
+  const updateUser = async (userData: Partial<IUserCreate>) => {
+    try {
+      const updatedUser = await api.patch("/users/me", userData)
+      setUser(updatedUser.data);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
