@@ -7,8 +7,8 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Next.js Auth App',
-  description: 'Authentication system with refresh token',
+  title: 'Admin Dashboard',
+  description: 'Administration and messaging system',
 };
 
 export default function RootLayout({
