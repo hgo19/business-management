@@ -7,7 +7,7 @@ import re
 
 class Roles(str, Enum):
     admin = "admin"
-    superadmin = "super_admin"
+    superadmin = "superadmin"
     operator = "operator"
 
 

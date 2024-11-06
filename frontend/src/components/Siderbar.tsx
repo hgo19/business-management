@@ -6,7 +6,6 @@ import { Spinner } from './Spinner';
 
 export default function Sidebar() {
   const { user, logout, isLoading } = useAuth();
-  console.log(user)
 
   return (
     <div className="w-64 bg-gray-100 h-full p-4 flex flex-col">
@@ -15,7 +14,7 @@ export default function Sidebar() {
         <Spinner />
       ) : (
         <nav className="space-y-2 flex-grow">
-          {user?.role === 'super_admin' && (
+          {user?.role === 'superadmin' && (
             <Link href="/super-admin" passHref>
               <Button variant="ghost" className="w-full justify-start">
                 <ShieldAlert className="mr-2 h-4 w-4" />
@@ -23,7 +22,7 @@ export default function Sidebar() {
               </Button>
             </Link>
           )}
-          {(user?.role === 'super_admin' || user?.role === 'admin') && (
+          {(user?.role === 'superadmin' || user?.role === 'admin') && (
             <Link href="/admin" passHref>
               <Button variant="ghost" className="w-full justify-start">
                 <Shield className="mr-2 h-4 w-4" />

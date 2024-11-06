@@ -25,19 +25,19 @@ engine = create_async_engine(url, echo=True)
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
-async def create_super_admin(session: AsyncSession):
+async def create_superadmin(session: AsyncSession):
     result = await session.execute(select(User).where(User.role == Roles.superadmin))
-    super_admin = result.scalar_one_or_none()
+    superadmin = result.scalar_one_or_none()
 
-    if super_admin is None:
+    if superadmin is None:
         hashed_password = hash_password(os.getenv("SUPER_ADMIN_PASSWORD"))
-        new_super_admin = User(
+        new_superadmin = User(
             name=os.getenv("SUPER_ADMIN_NAME"),
             email=os.getenv("SUPER_ADMIN_EMAIL"),
             password=hashed_password,
             role=Roles.superadmin,
         )
-        session.add(new_super_admin)
+        session.add(new_superadmin)
         await session.commit()
         print("Super admin user created.")
     else:
@@ -49,12 +49,12 @@ async def init_db():
         try:
             await session.execute(text("SELECT 1"))
             logger.debug("Database exists, continuing initialization.")
-            await create_super_admin(session)
+            await create_superadmin(session)
         except Exception as e:
             logger.debug("Database does not exist. Creating database...")
             if not database_exists(engine.url):
                 await create_database(engine.url)
-                await create_super_admin(session)
+                await create_superadmin(session)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

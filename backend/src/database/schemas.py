@@ -12,7 +12,7 @@ class Base(DeclarativeBase):
 
 class Roles(enum.Enum):
     admin = "admin"
-    superadmin = "super_admin"
+    superadmin = "superadmin"
     operator = "operator"
 
 

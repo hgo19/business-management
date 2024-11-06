@@ -17,7 +17,7 @@ export default async function middleware(request: NextRequest) {
     const decodedToken: any = jwtDecode(token.value);
     const userRole = decodedToken.role;
 
-    if (pathname === '/super-admin' && userRole !== 'super_admin') {
+    if (pathname === '/super-admin' && userRole !== 'superadmin') {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
 
@@ -35,7 +35,7 @@ export default async function middleware(request: NextRequest) {
     if (pathname === '/login') {
       let pathToRedirect = '/chat'
       switch (userRole) {
-        case 'super_admin':
+        case 'superadmin':
           pathToRedirect = '/super-admin';
           break;
         case 'admin':

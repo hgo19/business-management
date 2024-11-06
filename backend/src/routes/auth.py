@@ -54,10 +54,9 @@ async def login_users(login_data: UserLogin, session: AsyncSession = Depends(get
     )
 
 
-@auth_router.get("/refresh_token")
+@auth_router.post("/refresh_token")
 async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer())):
     expiry_timestamp = token_details["exp"]
-
     token_data = TokenData(**token_details)
 
     if datetime.fromtimestamp(expiry_timestamp) > datetime.now():

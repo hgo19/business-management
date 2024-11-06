@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       Cookies.set('refresh_token', refresh_token);
       setUser(user);
       switch (user.role) {
-        case 'super_admin':
+        case 'superadmin':
           router.push('/super-admin');
           break;
         case 'admin':
