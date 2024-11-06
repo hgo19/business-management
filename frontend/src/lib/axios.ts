@@ -24,11 +24,11 @@ api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const refreshToken = Cookies.get('refresh_token');
+    if (error.response?.status === 401 && !originalRequest._retry && refreshToken) {
       originalRequest._retry = true;
       try {
         Cookies.remove('access_token');
-        const refreshToken = Cookies.get('refresh_token');
         const { data } = await api.post<RefreshTokenResponse>('/auth/refresh_token', null, {
           headers: {
             'Authorization': `Bearer ${refreshToken}`,
