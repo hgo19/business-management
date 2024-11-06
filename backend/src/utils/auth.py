@@ -11,6 +11,7 @@ from .jwt import decode_token
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..repository.user_crud import UserCrudRepository
 from src.models.user import UserResponse
+from src.models.token import TokenResponse
 
 
 
@@ -35,7 +36,7 @@ class TokenBearer(HTTPBearer):
 
 
 class AccessTokenBearer(TokenBearer):
-    def verify_token_data(self, token_data: dict) -> None:
+    def verify_token_data(self, token_data: TokenResponse) -> None:
         if token_data and not token_data.token:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -44,7 +45,7 @@ class AccessTokenBearer(TokenBearer):
 
 
 class RefreshTokenBearer(TokenBearer):
-    def verify_token_data(self, token_data: dict) -> None:
+    def verify_token_data(self, token_data: TokenResponse) -> None:
         if token_data and not token_data.token:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
