@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MessageSquare, ShieldAlert, Shield, LogOut } from 'lucide-react';
+import { MessageSquare, ShieldAlert, Shield, LogOut, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/hooks/useAuth';
 import { Spinner } from './Spinner';
@@ -14,6 +14,12 @@ export default function Sidebar() {
         <Spinner />
       ) : (
         <nav className="space-y-2 flex-grow">
+          <Link href="/profile" passHref>
+            <Button variant="ghost" className="w-full justify-start">
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </Button>
+          </Link>
           {user?.role === 'superadmin' && (
             <Link href="/super-admin" passHref>
               <Button variant="ghost" className="w-full justify-start">
@@ -22,11 +28,11 @@ export default function Sidebar() {
               </Button>
             </Link>
           )}
-          {(user?.role === 'superadmin' || user?.role === 'admin') && (
-            <Link href="/admin" passHref>
+          {(user?.role === 'admin') && (
+            <Link href="/admin-dashboard" passHref>
               <Button variant="ghost" className="w-full justify-start">
                 <Shield className="mr-2 h-4 w-4" />
-                Admin
+                Admin dashboard
               </Button>
             </Link>
           )}
