@@ -19,7 +19,6 @@ export default function CreateAdminModal({ isOpen, onClose, setUsersData }: Crea
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<IUserCreate>();
 
   const onSubmit = async (data: IUserCreate) => {
-    console.log(data);
     const user = await api.post<IUserRead>("/users/super-admin", data)
     setUsersData((prev) => {
       return [...prev, user.data]
