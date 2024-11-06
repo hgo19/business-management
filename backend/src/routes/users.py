@@ -18,7 +18,7 @@ admin_checker = Depends(RoleChecker(["superadmin", "admin"]))
 
 
 @user_router.post(
-    "/company-admin",
+    "/super-admin",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     dependencies=[superadmin_checker],
@@ -30,16 +30,11 @@ async def create_company_admin(
 ):
     repository = UserCrudRepository(session)
     user_service = UserService(repository=repository)
-    if user_data.role != "admin":
+    possible_roles = ["admin", "superadmin"]
+    if user_data.role not in possible_roles:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Role must be admin for this endpoint",
-        )
-
-    if not user_data.company_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Company ID is required for admin users",
         )
 
     new_user = await user_service.create_user(user_data)
@@ -189,7 +184,7 @@ async def delete_user(
 @user_router.get(
     "/",
     response_model=List[UserResponse],
-    dependencies=[Depends(RoleChecker(["super_admin"]))],
+    dependencies=[superadmin_checker],
 )
 async def get_all_users(
     session: AsyncSession = Depends(get_db),
