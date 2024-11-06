@@ -2,13 +2,11 @@ import os
 import logging
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import text
-from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.future import select
 from dotenv import load_dotenv
 from typing import AsyncGenerator
-from .schemas import User
+from .schemas import User, Roles
 from src.utils.encrypter import hash_password
-from .schemas import Roles
 
 load_dotenv()
 
@@ -27,9 +25,9 @@ AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 async def create_superadmin(session: AsyncSession):
     result = await session.execute(select(User).where(User.role == Roles.superadmin))
-    superadmin = result.scalar_one_or_none()
+    superadmin = result.unique().scalars().first()
 
-    if superadmin is None:
+    if not superadmin:
         hashed_password = hash_password(os.getenv("SUPER_ADMIN_PASSWORD"))
         new_superadmin = User(
             name=os.getenv("SUPER_ADMIN_NAME"),
@@ -39,22 +37,23 @@ async def create_superadmin(session: AsyncSession):
         )
         session.add(new_superadmin)
         await session.commit()
-        print("Super admin user created.")
+        logger.info("Super admin user created.")
     else:
-        print("Super admin user already exists.")
+        logger.info("Super admin user already exists.")
 
 
 async def init_db():
-    async with AsyncSessionLocal() as session:
+    async with engine.begin() as conn:
         try:
-            await session.execute(text("SELECT 1"))
-            logger.debug("Database exists, continuing initialization.")
-            await create_superadmin(session)
+            await conn.execute(text("SELECT 1"))
+            logger.info("Database is available.")
         except Exception as e:
-            logger.debug("Database does not exist. Creating database...")
-            if not database_exists(engine.url):
-                await create_database(engine.url)
-                await create_superadmin(session)
+            logger.error(f"Database initialization failed: {e}")
+            await conn.run_sync(conn.sync_engine.dialect.create_database, engine.url)
+            logger.info("Database created successfully.")
+
+    async with AsyncSessionLocal() as session:
+        await create_superadmin(session)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -62,7 +61,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         try:
             yield db
         except Exception as e:
-            logger.error("Error connecting to database: %s", e)
+            logger.error(f"Database session error: {e}")
             await db.rollback()
             raise
         finally:
