@@ -1,53 +1,17 @@
-from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, EmailStr, validator
+from .shared import UserRead, CompanyRead
 import re
 
-
-class CompanyBase(BaseModel):
-    name: str = Field(..., title="Name", description="The name of the company")
-    description: Optional[str] = Field(
-        None, title="Description", description="Description of the company"
-    )
-    website: Optional[str] = Field(
-        None, title="Website", description="Company website URL"
-    )
-    contact_email: EmailStr = Field(
-        ..., title="Contact Email", description="Primary contact email for the company"
-    )
-    contact_phone: str = Field(
-        ..., title="Contact Phone", description="Primary contact phone number"
-    )
-    street: Optional[str] = Field(None, title="Street", description="Street address")
-    city: Optional[str] = Field(None, title="City", description="City")
-    state: Optional[str] = Field(
-        None, title="State", description="State/Province/Region"
-    )
-    postal_code: str = Field(..., title="Postal Code", description="Postal/ZIP code")
-    country: Optional[str] = Field(None, title="Country", description="Country")
-    admin_id: str = Field(
-        ..., title="Admin ID", description="The ID of the company administrator"
-    )
-
-    @validator("contact_phone")
-    def validate_phone(cls, v):
-        if not re.match(r"^\+?[1-9]\d{1,14}$", v):
-            raise ValueError("Invalid phone number format")
-        return v
-
-
-class CompanyCreate(CompanyBase):
+class CompanyCreate(CompanyRead):
     pass
 
-
-class CompanyRead(CompanyBase):
-    id: str
-    created_at: datetime
-    updated_at: datetime
+class CompanyResponse(CompanyRead):
+    users: Optional[List[UserRead]] = []
+    admin: Optional[UserRead] = None
 
     class Config:
         from_attributes = True
-
 
 class CompanyUpdate(BaseModel):
     name: Optional[str] = None
@@ -64,21 +28,6 @@ class CompanyUpdate(BaseModel):
 
     @validator("contact_phone")
     def validate_phone(cls, v):
-        if v is not None:
-            if not re.match(r"^\+?[1-9]\d{1,14}$", v):
-                raise ValueError("Invalid phone number format")
+        if v is not None and not re.match(r"^\+?[1-9]\d{1,14}$", v):
+            raise ValueError("Invalid phone number format")
         return v
-
-
-class CompanyResponse(CompanyRead):
-    users: Optional[List["UserResponse"]] = []
-    admin: Optional["UserResponse"] = None
-
-    class Config:
-        from_attributes = True
-
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .user import UserResponse
