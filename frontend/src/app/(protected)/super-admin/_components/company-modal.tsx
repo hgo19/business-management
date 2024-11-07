@@ -23,9 +23,6 @@ interface CompanyModalProps {
 
 export default function CompanyModal({ isOpen, onClose, setCompaniesData, editingCompany, admins }: CompanyModalProps) {
   const { register, handleSubmit, formState: { errors }, reset, control, setValue } = useForm<ICompanyCreate & ICompanyUpdate>()
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
 
   useEffect(() => {
     if (editingCompany) {
@@ -158,22 +155,11 @@ export default function CompanyModal({ isOpen, onClose, setCompaniesData, editin
                         <SelectValue placeholder="Select an admin" />
                       </SelectTrigger>
                       <SelectContent>
-                        {isLoading ? (
-                          <SelectItem value="loading" disabled>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Loading admins...
-                          </SelectItem>
-                        ) : error ? (
-                          <SelectItem value="error" disabled>
-                            {error}
-                          </SelectItem>
-                        ) : (
-                          admins.map((admin) => (
+                        {admins.map((admin) => (
                             <SelectItem key={admin.id} value={admin.id}>
                               {admin.name}
                             </SelectItem>
-                          ))
-                        )}
+                          ))}
                       </SelectContent>
                     </Select>
                   )}
@@ -183,7 +169,7 @@ export default function CompanyModal({ isOpen, onClose, setCompaniesData, editin
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit">
               {editingCompany ? 'Update Company' : 'Create Company'}
             </Button>
           </DialogFooter>

@@ -42,8 +42,10 @@ export default function Component() {
 
   useEffect(() => {
     const getAdmins = () => {
-      const admins = usersData.filter(userData => userData.role === "admin")
-      setAdmins(admins)
+      if (usersData && usersData.length) {
+        const admins = usersData.filter(userData => userData.role === "admin")
+        setAdmins(admins)
+      }
     }
 
     getAdmins()
