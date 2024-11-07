@@ -11,7 +11,7 @@ from .jwt import decode_token
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..repository.user_crud import UserCrudRepository
 from src.models.user import UserResponse
-from src.models.token import TokenResponse
+from src.models.token import TokenResponse, TokenData
 
 
 class TokenBearer(HTTPBearer):
@@ -53,14 +53,12 @@ class RefreshTokenBearer(TokenBearer):
 
 
 async def get_current_user(
-    token_details: dict = Depends(AccessTokenBearer()),
+    token_details: TokenData = Depends(AccessTokenBearer()),
     session: AsyncSession = Depends(get_db),
 ):
     user_email = token_details.email
     user_repository = UserCrudRepository(session)
     user = await user_repository.get_by_email(user_email)
-
-    print(f"USER PRINT: {user}")
 
     if user is None:
         raise HTTPException(
