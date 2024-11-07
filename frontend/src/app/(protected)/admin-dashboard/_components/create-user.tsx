@@ -3,9 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { IUserRead } from '@/types/user';
 import api from '@/lib/axios';
 
@@ -29,16 +27,20 @@ export default function CreateUserModal({ isOpen, onClose, setUsersData, company
 
   useEffect(() => {
     if (company_id) {
-      setValue("role", "operator")
-      setValue("company_id", company_id)
+      setValue("role", "operator");
+      setValue("company_id", company_id);
     }
-  }, [company_id, setValue])
+  }, [company_id, setValue]);
 
   const onSubmit = async (data: UserCreate) => {
-    const user = await api.post("/users/company-operator", data)
-    setUsersData((prev) => [...prev, user.data])
-    reset();
-    onClose();
+    try {
+      const user = await api.post("/users/company-operator", data);
+      setUsersData((prev) => [...prev, user.data]);
+      reset();
+      onClose();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -80,7 +82,14 @@ export default function CreateUserModal({ isOpen, onClose, setUsersData, company
                 id="password"
                 type="password"
                 className="col-span-3"
-                {...register("password", { required: "Password is required" })}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 8, message: "Password must be at least 8 characters" },
+                  pattern: {
+                    value: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/,
+                    message: "Password must include an uppercase letter, a number, and a special character"
+                  }
+                })}
               />
               {errors.password && <p className="text-red-500 text-sm col-span-3 col-start-2">{errors.password.message}</p>}
             </div>

@@ -15,8 +15,6 @@ export default function Component() {
 
   const { user } = useAuth()
 
-  console.log(user)
-  
   useEffect(() => {
     const fetchData = async () => {
       if (user?.administered_company) {
@@ -58,16 +56,16 @@ export default function Component() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usersData.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role}</TableCell>
-                <TableCell>
+            {usersData.map((userData) => (
+              <TableRow key={userData.id}>
+                <TableCell>{userData.name}</TableCell>
+                <TableCell>{userData.email}</TableCell>
+                <TableCell>{userData.role}</TableCell>
+                <TableCell hidden={userData.id === user?.id}>
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDeleteUser(user.id)}
+                    onClick={() => handleDeleteUser(userData.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

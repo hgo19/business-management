@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useForm, Controller } from 'react-hook-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -110,7 +110,14 @@ export default function UserModal({ isOpen, onClose, setUsersData, editingUser }
                   id="password"
                   type="password"
                   className="col-span-3"
-                  {...register("password", { required: "Password is required" })}
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: { value: 8, message: "Password must be at least 8 characters" },
+                    pattern: {
+                      value: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/,
+                      message: "Password must include an uppercase letter, a number, and a special character"
+                    }
+                  })}
                 />
                 {errors.password && <p className="text-red-500 text-sm col-span-3 col-start-2">{errors.password.message}</p>}
               </div>
