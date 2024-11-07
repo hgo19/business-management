@@ -11,3 +11,7 @@ fastapi
 python-jose[cryptography]
 passlib
 uvicorn
+aiokafka
+uvicorn[standard]
+websockets
+kafka-python

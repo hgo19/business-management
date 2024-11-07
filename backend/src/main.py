@@ -5,12 +5,11 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from fastapi.exceptions import RequestValidationError
 import logging
 from src.database.connection import init_db, dispose_engine
-from src.routes import auth, users, companies
+from src.routes import auth, users, companies, chat
 from fastapi.exceptions import RequestValidationError
 
 app = FastAPI()
 
-# Configure logging
 logger = logging.getLogger(__name__)
 
 app.add_middleware(
@@ -24,6 +23,7 @@ app.add_middleware(
 app.include_router(auth.auth_router)
 app.include_router(users.user_router)
 app.include_router(companies.company_router)
+app.include_router(chat.chat_router)
 
 
 @app.on_event("startup")
