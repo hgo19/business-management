@@ -5,13 +5,15 @@ import api from '@/lib/axios';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { IUserCreate } from '@/types/user';
+import { ICompanyRead } from '@/types/company';
 
 interface User {
   id: string;
   email: string;
   name: string;
   role: string;
-  company_id: string;
+  company_id?: string;
+  administered_company?: ICompanyRead;
 }
 
 interface AuthContextType {
@@ -63,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           router.push('/admin-dashboard');
           break;
         case 'operator':
-          router.push('/company-details');
+          router.push('/chat');
           break;
         default:
           router.push('/chat');
