@@ -21,14 +21,20 @@ interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   setUsersData: Dispatch<SetStateAction<IUserRead[]>>;
+  companyId: string;
 }
 
-export default function CreateUserModal({ isOpen, onClose, setUsersData }: CreateUserModalProps) {
+export default function CreateUserModal({ isOpen, onClose, setUsersData, companyId: company_id }: CreateUserModalProps) {
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<UserCreate>();
 
+  useEffect(() => {
+    if (company_id) {
+      setValue("role", "operator")
+      setValue("company_id", company_id)
+    }
+  }, [company_id, setValue])
 
   const onSubmit = async (data: UserCreate) => {
-    console.log(data);
     const user = await api.post("/users/company-operator", data)
     setUsersData((prev) => [...prev, user.data])
     reset();

@@ -14,11 +14,13 @@ export default function Component() {
   const [usersData, setUsersData] = useState<IUserRead[]>([])
 
   const { user } = useAuth()
+
+  console.log(user)
   
   useEffect(() => {
     const fetchData = async () => {
-      if (user?.company_id) {
-        const users = await api.get(`/users/company/${user.company_id}`)
+      if (user?.administered_company) {
+        const users = await api.get(`/users/company/${user.administered_company.id}`)
         setUsersData(users.data)
       }
     }
@@ -76,7 +78,7 @@ export default function Component() {
         </Table>
       </section>
 
-      <CreateUserModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} setUsersData={setUsersData} />
+      <CreateUserModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} setUsersData={setUsersData} companyId={user?.administered_company?.id!} />
     </div>
   );
 }
