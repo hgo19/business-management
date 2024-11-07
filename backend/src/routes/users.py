@@ -85,7 +85,6 @@ async def create_company_operator(
 @user_router.get(
     "/company/{company_id}",
     response_model=List[UserResponse],
-    dependencies=[admin_checker],
 )
 async def get_company_users(
     company_id: str,
@@ -93,7 +92,8 @@ async def get_company_users(
     token_details: dict = Depends(access_token_bearer),
     current_user: UserResponse = Depends(get_current_user)
 ):
-    if current_user.role == "admin" and current_user.administered_company.id != company_id:
+    user_company_id = current_user.company_id or current_user.administered_company.id
+    if  user_company_id != company_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin can only view users from their own company",
@@ -238,7 +238,6 @@ async def update_user(
 @user_router.get(
     "/{user_id}",
     response_model=UserResponse,
-    dependencies=[admin_checker],
     status_code=status.HTTP_200_OK,
 )
 async def get_user_by_id(

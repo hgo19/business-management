@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from ..models.user import UserCreate, UserResponse, UserUpdate, UserRead
 from ..database.schemas import User, Roles
+from sqlalchemy import or_
 
 
 class UserCrudRepository:
@@ -74,7 +75,12 @@ class UserCrudRepository:
         result = await self.db.execute(
             select(User)
             .options(joinedload(User.company), joinedload(User.administered_company))
-            .filter(User.company_id == company_id)
+            .filter(
+                or_(
+                    User.company_id == company_id,
+                    User.administered_company.has(id=company_id)  # Check administered_company.id
+                )
+            )
         )
         users = result.unique().scalars().all()
         return [UserResponse.from_orm(user) for user in users]
