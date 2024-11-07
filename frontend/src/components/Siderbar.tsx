@@ -36,12 +36,14 @@ export default function Sidebar() {
               </Button>
             </Link>
           )}
-          <Link href="/messaging" passHref>
-            <Button variant="ghost" className="w-full justify-start">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Messaging
-            </Button>
-          </Link>
+          {['operator', 'admin'].some(role => role === user?.role) && (
+            <Link href="/chat" passHref>
+              <Button variant="ghost" className="w-full justify-start">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Chat
+              </Button>
+            </Link>
+          )}
         </nav>
       )}
       <Button variant="ghost" className="w-full justify-start mt-auto" onClick={logout}>

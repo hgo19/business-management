@@ -6,7 +6,7 @@ export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('access_token');
 
-  const publicPaths = ['/login', '/chat'];
+  const publicPaths = ['/login'];
   const isPublicPath = publicPaths.includes(pathname);
 
   if (!token && !isPublicPath) {
@@ -28,7 +28,7 @@ export default async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
 
-    if (pathname === '/company-details' && userRole !== 'operator') {
+    if (pathname === '/chat' && !['operator', 'admin'].some(role => role === userRole)) {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     
     }
@@ -42,7 +42,7 @@ export default async function middleware(request: NextRequest) {
           pathToRedirect = '/admin-dashboard';
           break;
         case 'operator':
-          pathToRedirect = '/company-details';
+          pathToRedirect = '/chat';
           break;
         default:
           pathToRedirect = '/chat';
